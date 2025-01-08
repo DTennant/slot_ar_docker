@@ -1,0 +1,65 @@
+trainer:
+  target: paintmind.engine.trainer.DiffusionTrainer
+  params:
+    num_epoch: 200
+    valid_size: 64
+    lr: 3.5e-5
+    lr_min: 5e-6
+    warmup_steps: 2000
+    warmup_lr_init: 1e-7
+    decay_steps: 25000
+    batch_size: 64 # now the epoch will correspond to 130_000_000 examples seen in training
+    num_workers: 32
+    pin_memory: True
+    grad_accum_steps: 1
+    mixed_precision: 'bf16'
+    max_grad_norm: 1.0
+    save_every: 5000
+    sample_every: 2000
+    result_folder: "output/vq/dit_ffhq_debug"
+    log_dir: "output/vq/dit_ffhq_debug/logs"
+    # result_folder: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large"
+    # log_dir: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/logs"
+    use_multi_epochs_dataloader: True
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.diffuse_slot.DiffuseSlot
+      params:
+        slot_dim: 128
+        num_slots: 64
+        num_samplers: 64
+        sampler_dim: 128
+
+        use_vq: False
+        use_lfq: True
+        codebook_size: 65536
+        code_dim: 16
+        code_beta: 0.1
+        vq_norm: False
+        # TODO: find a setting where no vq can yield good results.
+
+        cond_method: 'token'
+        dit_model: 'DiT-XL-2'
+        vae: 'stabilityai/sd-vae-ft-ema'
+        enable_nest: False
+        enable_nest_after: 100
+        nest_rho: 0.03
+        nest_dist: uniform
+        use_encoder_rgb: True
+        encoder: 'vit_base_patch16'
+        enc_img_size: 256
+
+        pretrained_dit: /mnt/ceph_rbd/zbc/.cache/DiT-XL-2-256x256.pt
+        freeze_dit: False
+        # pretrained_encoder: None #/mnt/ceph_rbd/zbc/.cache/dinov2_vitb14_reg4_pretrain.pth
+
+        # ckpt_path: "output/vq/dit_vq_imagenet_pretrain_grad_accum2_lfq/models/step30000"
+        ckpt_path: None
+
+    dataset:
+      target: paintmind.utils.datasets.FFHQDataset
+      params:
+        use_vae: True
+        root: /mnt/ceph_rbd/zbc/ffhq-dataset/images256x256/
+        img_size: 256
+    

@@ -1,0 +1,59 @@
+trainer:
+  target: paintmind.engine.trainer.DiffusionTrainer
+  params:
+    num_epoch: 1400
+    valid_size: 64
+    lr: 3.5e-4
+    lr_min: 5e-5
+    warmup_steps: 2000
+    warmup_lr_init: 1e-6
+    decay_steps: 25000
+    batch_size: 256 # now the epoch will correspond to 130_000_000 examples seen in training
+    num_workers: 32
+    pin_memory: True
+    grad_accum_steps: 1
+    mixed_precision: 'bf16'
+    max_grad_norm: 3.0
+    save_every: 3000
+    sample_every: 3000
+    result_folder: "output/dit_celeba64_1400ep_nest_after800"
+    log_dir: "output/dit_celeba64_1400ep_nest_after800/logs"
+    # result_folder: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large"
+    # log_dir: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/logs"
+    use_multi_epochs_dataloader: True
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.diffuse_slot.DiffuseSlot
+      params:
+        slot_dim: 8
+        num_slots: 64
+        num_samplers: 64
+        sampler_dim: 8
+        cond_method: 'token'
+        dit_model: 'DiT-XL-2'
+        vae: 'stabilityai/sdxl-vae'
+        enable_nest: False
+        enable_nest_after: 800
+        nest_rho: 0.03
+        nest_dist: uniform
+        use_encoder_rgb: True
+        encoder: 'vit_base_patch16'
+        enc_img_size: 64
+        # ckpt_path: None
+        ckpt_path: "output/dit_celeba64_1400ep_nest_after800/models/step78000"
+        # ckpt_path: "output/dit_ffhq128_2000ep_nest_after1000/models/step60000"
+        # ckpt_path: "output/dit_5560_ln/models/step780000"
+        # ckpt_path: "output/dit_woof_3460ep_enable_after_3400ep_noln/models/step365000"
+        # ckpt_path: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/models/step243000"
+
+    dataset:
+      # target: paintmind.utils.datasets.CoCoPanoptic
+      # target: paintmind.utils.datasets.ImageWoof
+      target: paintmind.utils.datasets.CelebADataset
+      params:
+        # root: /mnt/ceph_rbd/zbc/data/imagewoof/
+        use_vae: True
+        root: /mnt/ceph_rbd/zbc/celeba-dataset/img_align_celeba/img_align_celeba/
+        img_size: 64
+        # scale: 0.8
+    

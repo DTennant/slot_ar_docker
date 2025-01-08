@@ -1,0 +1,72 @@
+trainer:
+  target: paintmind.engine.trainer.DiffusionTrainer
+  params:
+    num_epoch: 400
+    valid_size: 64
+    lr: 3.5e-4
+    lr_min: 5e-5
+    warmup_steps: 4000
+    warmup_lr_init: 1e-6
+    decay_steps: 25000
+    batch_size: 96
+    num_workers: 32
+    pin_memory: True
+    grad_accum_steps: 1
+    mixed_precision: 'bf16'
+    max_grad_norm: 3.0
+    save_every: 5000
+    sample_every: 5000
+    result_folder: "/disk/scratch_big/bingchen/slot_ar/save/dit_lsun_bedroom"
+    log_dir: "/disk/scratch_big/bingchen/slot_ar/save/dit_lsun_bedroom/logs"
+    # result_folder: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large"
+    # log_dir: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/logs"
+    use_multi_epochs_dataloader: True
+    making_cache: False
+    cache_mode: False
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.diffuse_slot.DiffuseSlot
+      params:
+        slot_dim: 8
+        num_slots: 64
+        num_samplers: 64
+        sampler_dim: 8
+        cond_method: 'token'
+        dit_model: 'DiT-XL-2'
+        vae: 'stabilityai/sd-vae-ft-ema'
+        enable_nest: False
+        enable_nest_after: 50
+        nest_rho: 0.03
+        nest_dist: uniform
+        use_encoder_rgb: True
+        encoder: 'vit_base_patch16'
+        enc_img_size: 128
+        eval_fid: True
+        fid_stats: 'fid_stats/adm_in256_stats.npz'
+
+        # ckpt_path: None
+        ckpt_path: "save/dit_lsun_bedroom/models/step405000"
+        # ckpt_path: "save/dit_imagenet100ep_nest_after50/models/step132000"
+        # ckpt_path: "output/dit_5560_ln/models/step780000"
+        # ckpt_path: "output/dit_woof_3460ep_enable_after_3400ep_noln/models/step365000"
+        # ckpt_path: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/models/step243000"
+        
+        use_vq: False
+        use_lfq: False
+        codebook_size: 65536
+        code_dim: 8
+        code_beta: 0.1
+        vq_norm: False
+
+    dataset:
+      # target: paintmind.utils.datasets.CoCoPanoptic
+      target: paintmind.utils.datasets.LSUN
+      # target: paintmind.utils.datasets.ImageNet
+      params:
+        use_vae: True
+        # root: /mnt/ceph_rbd/zbc/data/imagenet100/
+        root: "/disk/scratch_fast/bingchen/dataset/lsun/bedroom_train_lmdb"
+        split: train
+        img_size: 128
+        scale: 0.8
+    

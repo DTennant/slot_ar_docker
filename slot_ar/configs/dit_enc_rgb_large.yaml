@@ -1,0 +1,51 @@
+trainer:
+  target: paintmind.engine.trainer.DiffusionTrainer
+  params:
+    num_epoch: 100
+    valid_size: 64
+    lr: 3.5e-4
+    lr_min: 5e-5
+    warmup_steps: 2000
+    warmup_lr_init: 1e-6
+    decay_steps: 25000
+    batch_size: 32
+    num_workers: 32 
+    pin_memory: False
+    grad_accum_steps: 1
+    mixed_precision: 'bf16'
+    max_grad_norm: 3.0
+    save_every: 5000
+    sample_every: 5000
+    result_folder: "output/tokenizer_dit_encrgb_nested_slot_large"
+    log_dir: "output/tokenizer_dit_encrgb_nested_slot_large/logs"
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.diffuse_slot.DiffuseSlot
+      params:
+        slot_dim: 4
+        num_slots: 32
+        num_samplers: 32
+        sampler_dim: 4
+        cond_method: 'token'
+        dit_model: 'DiT-L-2'
+        vae: 'stabilityai/sd-vae-ft-ema'
+        enable_nest: True
+        nest_rho: 0.03
+        use_encoder_rgb: True
+        encoder: 'vit_base_patch16'
+        enc_img_size: 256
+
+        ckpt_path: None
+        # ckpt_path: "output/tokenizer_causal_slot/models/step10/"
+
+    dataset:
+      # target: paintmind.utils.datasets.CoCoPanoptic
+      target: paintmind.utils.datasets.ImageNet
+      params:
+        root: /mnt/ceph_rbd/zbc/data/imagenet/
+        use_vae: True
+        # root: /disk/scratch_fast/datasets/ImageNet1k/
+        split: train
+        img_size: 256
+        scale: 0.8
+    

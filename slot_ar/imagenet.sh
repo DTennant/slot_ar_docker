@@ -1,0 +1,2 @@
+# accelerate launch --config_file=configs/eidf_config.yaml train_net.py --cfg configs/vit_vqgan.yaml
+accelerate launch --config_file=configs/a100_config.yaml train_net.py --cfg configs/dit_imagenet_350ep.yaml

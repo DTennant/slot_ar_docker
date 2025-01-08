@@ -1,0 +1,63 @@
+trainer:
+  target: paintmind.engine.trainer.DiffusionTrainer
+  params:
+    num_epoch: 2000
+    valid_size: 64
+    lr: 3.5e-4
+    lr_min: 5e-5
+    warmup_steps: 2000
+    warmup_lr_init: 1e-6
+    decay_steps: 25000
+    batch_size: 32 # now the epoch will correspond to 130_000_000 examples seen in training
+    num_workers: 32
+    pin_memory: True
+    grad_accum_steps: 2
+    mixed_precision: 'bf16'
+    max_grad_norm: 3.0
+    save_every: 3000
+    sample_every: 3000
+    result_folder: "output/vq/dit_vq_ffhq128_pretrain_grad_accum2"
+    log_dir: "output/vq/dit_vq_ffhq128_pretrain_grad_accum2/logs"
+    # result_folder: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large"
+    # log_dir: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/logs"
+    eval_fid: False
+    fid_stats: 'fid_stats/adm_ffhq128_stats.npz'
+    compile: False
+    use_multi_epochs_dataloader: True
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.diffuse_slot.DiffuseSlot
+      params:
+        slot_dim: 128
+        num_slots: 64
+        num_samplers: 64
+        sampler_dim: 128
+
+        use_vq: True
+        codebook_size: 65536
+        code_dim: 128
+        code_beta: 0.25
+
+        cond_method: 'token'
+        dit_model: 'DiT-XL-2'
+        vae: 'stabilityai/sd-vae-ft-ema'
+        enable_nest: False
+        enable_nest_after: 1000
+        nest_rho: 0.03
+        nest_dist: uniform
+        use_encoder_rgb: True
+        encoder: 'vit_base_patch14_reg4'
+        enc_img_size: 256
+
+        pretrained_dit: /mnt/ceph_rbd/zbc/.cache/DiT-XL-2-256x256.pt
+        pretrained_encoder: /mnt/ceph_rbd/zbc/.cache/dinov2_vitb14_reg4_pretrain.pth
+
+        ckpt_path: None
+
+    dataset:
+      target: paintmind.utils.datasets.FFHQDataset
+      params:
+        use_vae: True
+        root: /mnt/ceph_rbd/zbc/ffhq-dataset/images256x256/
+        img_size: 256
+    

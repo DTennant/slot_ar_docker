@@ -1,0 +1,70 @@
+trainer:
+  target: paintmind.engine.trainer.DiffusionTrainer
+  params:
+    num_epoch: 2000
+    valid_size: 64
+    lr: 3.5e-4
+    lr_min: 5e-5
+    warmup_steps: 2000
+    warmup_lr_init: 1e-6
+    decay_steps: 25000
+    batch_size: 36
+    num_workers: 32
+    pin_memory: True
+    grad_accum_steps: 2
+    mixed_precision: 'bf16'
+    max_grad_norm: 3.0
+    save_every: 20000
+    sample_every: 20000
+    result_folder: "output/dit_ffhq128_2000ep_nest_after1000_geo"
+    log_dir: "output/dit_ffhq128_2000ep_nest_after1000_geo/logs"
+    # result_folder: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large"
+    # log_dir: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/logs"
+    # eval_fid: True
+    # fid_stats: 'fid_stats/adm_ffhq128_stats.npz'
+    # compile: True
+    # use_multi_epochs_dataloader: True
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.diffuse_slot.DiffuseSlot
+      params:
+        slot_dim: 12
+        num_slots: 64
+        num_samplers: 64
+        sampler_dim: 12
+        cond_method: 'token'
+        dit_model: 'DiT-XL-2'
+        vae: 'stabilityai/sdxl-vae'
+        enable_nest: False
+        enable_nest_after: 1000
+        nest_rho: 0.03
+        # nest_dist: uniform
+        nest_dist: geometric
+        use_encoder_rgb: True
+        encoder: 'vit_base_patch16'
+        enc_img_size: 256
+        ckpt_path: None
+        # ckpt_path: "output/dit_ffhq128_2000ep_nest_after1000/models/step60000"
+        # ckpt_path: "output/dit_5560_ln/models/step780000"
+        # ckpt_path: "output/dit_woof_3460ep_enable_after_3400ep_noln/models/step365000"
+        # ckpt_path: "output/tokenizer_dit_woof_5260ep_nested_enable_after_64slot_uniform_large/models/step243000"
+
+        use_vq: False
+        use_lfq: False
+        codebook_size: 65536
+        code_dim: 8
+        code_beta: 0.1
+        vq_norm: False
+
+    dataset:
+      # target: paintmind.utils.datasets.CoCoPanoptic
+      # target: paintmind.utils.datasets.ImageWoof
+      target: paintmind.utils.datasets.FFHQDataset
+      params:
+        # root: /mnt/ceph_rbd/zbc/data/imagewoof/
+        use_vae: True
+        root: /mnt/ceph_rbd/zbc/ffhq-dataset/images256x256/
+        # root: /dev/shm/images256x256/
+        img_size: 256
+        # scale: 0.8
+    

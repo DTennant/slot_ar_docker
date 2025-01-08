@@ -1,0 +1,113 @@
+trainer:
+  target: paintmind.engine.trainer.VAETrainer
+  params:
+    num_epoch: 100
+    valid_size: 64
+    lr: 3.5e-4
+    lr_min: 5e-5
+    warmup_steps: 2000
+    warmup_lr_init: 1e-6
+    decay_steps: 25000
+    batch_size: 64
+    num_workers: 32
+    pin_memory: False
+    grad_accum_steps: 1
+    mixed_precision: 'bf16'
+    max_grad_norm: 3.0
+    save_every: 5000
+    sample_every: 5000
+    # result_folder: "output/baseline_slots_no_diffusion_pixeldec"
+    # log_dir: "output/baseline_slots_no_diffusion_pixeldec/logs"
+    result_folder: "output/tokenizer_vae_nested_slot"
+    log_dir: "output/tokenizer_vae_nested_slot/logs"
+    model:
+      # target: paintmind.stage1.vqmodel.TiTok
+      target: paintmind.stage1.vae.AutoencoderNested
+      params:
+        dim_slot: 32
+        num_slot: 128
+        embed_dim: 16
+        ch_mult: [1, 1, 2, 2, 4]
+        img_size: 256
+        use_ramp: True
+        ramp_method: 'sigmoid'
+        # head_type: 'early_return'
+        # encoder: 'vit_base_patch16'
+        # use_causal_grouping: True
+        # embed_dim: 128
+        # n_embed: 8192
+        # n_slots: 32
+        # slot_dim: 512
+        # beta: 0.25
+        ckpt_path: None
+        load_ckpt_path: pretrained_models/vae/kl16.ckpt
+        # ckpt_path: "output/tokenizer_causal_slot/models/step10/"
+
+        # encoder_config:
+        #   target: paintmind.stage1.layers.Encoder
+        #   params:
+        #     layer_type: normal
+        #     attn_type: normal
+        #     image_size: 256
+        #     patch_size: 8
+        #     num_slots: 32
+        #     dim: 512
+        #     depth: 8
+        #     num_head: 16
+        #     mlp_dim: 2048
+        #     in_channels: 3
+        #     dim_head: 32
+        #     dropout: 0.
+
+        # decoder_config:
+        #   target: paintmind.stage1.titok_blocks.TiTokDecoder
+        #   params:
+        #     random_place_holder: False # a random param holder
+        #     # image_size: 256
+        #     # patch_size: 8
+        #     # num_slots: 64
+        #     dim: 1024
+        #     token_size: 12
+            # depth: 8
+            # num_head: 16
+            # use_diffusion: True
+        
+        # slot_attn_config:
+        #   target: paintmind.modules.ocl.perceptual_grouping.SlotAttentionGrouping
+        #   params:
+        #     feature_dim: 512
+        #     object_dim: 320
+        #     n_heads: 16
+        #     iters: 3
+        #     eps: 1e-8
+        
+        # mask2former_config:
+        #   target: paintmind.stage1.seghead.SegHead
+        #   params:
+        #     config_file: "configs/mask2former_panoptic.yaml"
+        #     in_channels: 512
+        #     origin: False
+        #     mid_channels: 320
+        #     out_channels: 512
+        #     fpn_config:
+        #       target: paintmind.modules.mask2former.fpn.FPN
+        #       params:
+        #         in_channels: 512
+        #         scale_factors: [2, 1, 0.5, 0.25]
+        #         strides: [2, 4, 8, 16]
+        #         out_channels: 512
+        #         norm: 'LN'
+        #         use_bias: False
+        #         slot_dim: 320
+        #         slot_channels: 320
+        #         fpn_names: ["res2", "res3", "res4", "res5"]
+    dataset:
+      # target: paintmind.utils.datasets.CoCoPanoptic
+      target: paintmind.utils.datasets.ImageNet
+      params:
+        root: /mnt/ceph_rbd/zbc/data/imagenet/
+        # root: /disk/scratch_fast/datasets/ImageNet1k/
+        split: train
+        img_size: 256
+        scale: 0.8
+    
